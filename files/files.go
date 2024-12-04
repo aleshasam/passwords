@@ -2,11 +2,32 @@ package files
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"os"
 )
 
-func Write(content []byte, path string) {
-	file, createFileError := os.Create(path)
+type JsonDB struct {
+	filename string
+}
+
+func NewJsonDB(name string) *JsonDB {
+	return &JsonDB{
+		filename: name,
+	}
+}
+
+func (db JsonDB) Read() ([]byte, error) {
+	bytes, readErr := os.ReadFile(db.filename)
+
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	return bytes, nil
+}
+
+func (db JsonDB) Write(content []byte) {
+	file, createFileError := os.Create(db.filename)
 	if createFileError != nil {
 		fmt.Println("Ошибка: ", createFileError.Error())
 		return
@@ -15,18 +36,8 @@ func Write(content []byte, path string) {
 	defer file.Close()
 
 	if writeError != nil {
-		fmt.Println("Ошибка: ", writeError.Error())
+		color.Red("Ошибка: ", writeError.Error())
 		return
 	}
-	fmt.Println("Запись успешна")
-}
-
-func Read(path string) ([]byte, error) {
-	bytes, err := os.ReadFile(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes, nil
+	color.Green("Запись успешна")
 }
